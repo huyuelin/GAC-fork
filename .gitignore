@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime artifacts (never commit training outputs)
+checkpoints/
+logs/
+runs/
+wandb/
+tensorboard/
+outputs/
+*.pt
+*.bin
+*.safetensors
+
+# Environment secrets
+.env
+.env.local

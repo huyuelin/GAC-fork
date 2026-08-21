@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: >
+  If you use GAC in your research, please cite the accompanying EMNLP 2026
+  paper.
+title: "GAC: Noise-Aware Adaptive Mixing for Hybrid SFT-RL Post-Training"
+version: "0.1.0"
+authors:
+  - family-names: Hu
+    given-names: Yuelin
+    affiliation: Shanghai Jiao Tong University
+  - family-names: Yu
+    given-names: Zhenbo
+    affiliation: Shanghai Jiao Tong University
+  - family-names: Liu
+    given-names: Wei
+    affiliation: Shanghai Maritime University
+  - family-names: Cheng
+    given-names: Zhengxue
+    affiliation: Shanghai Jiao Tong University
+  - family-names: Song
+    given-names: Li
+    affiliation: Shanghai Jiao Tong University
+preferred-citation:
+  type: conference-paper
+  title: "GAC: Noise-Aware Adaptive Mixing for Hybrid SFT-RL Post-Training"
+  authors:
+    - family-names: Hu
+      given-names: Yuelin
+    - family-names: Yu
+      given-names: Zhenbo
+    - family-names: Liu
+      given-names: Wei
+    - family-names: Cheng
+      given-names: Zhengxue
+    - family-names: Song
+      given-names: Li
+  collection-title: >
+    Proceedings of the 2026 Conference on Empirical Methods in Natural
+    Language Processing (EMNLP)
+  year: 2026
+  location:
+    name: Budapest, Hungary

@@ -1,0 +1,43 @@
+# Default hyperparameters for the Guided Adaptive Controller.
+# These reproduce the mainline configuration reported in Sec. 4.1 of
+#   Hu et al., "GAC: Noise-Aware Adaptive Mixing for Hybrid SFT-RL
+#   Post-Training", EMNLP 2026.
+
+controller:
+  # --- Closed-form estimator ---
+  alpha_static: 0.5              # fallback target ratio when no outer KL controller is present
+  init_mu: 0.5                   # initial mixing weight
+  mu_min: 0.05                   # hard lower clip
+  mu_max: 0.90                   # hard upper clip
+
+  # --- Guardrails ---
+  ema_beta: 0.99                 # EMA smoothing coefficient
+  mu_change_cap: 0.01            # per-step cap on |Δµ|
+  mu_update_freq: 10             # controller refreshes every N optimiser steps
+  trim_ratio_sft: 0.10           # two-sided tail trim for σ_s²
+  delta_g2_cap_ratio: 0.0        # optional cap on Δg̃² (0 disables)
+
+schedule:
+  warmup_steps: 200              # linear ramp to mu_peak
+  decay_steps: 800               # cosine decay from mu_peak to mu_valley
+  mu_peak: 0.85                  # SFT-dominated early phase
+  mu_valley: 0.15                # RL-dominated late phase
+
+kl_controller:
+  kl_target: 0.02
+  alpha_min: 0.10
+  alpha_max: 0.95
+  eta_up: 0.20
+  eta_down: 0.30
+  hysteresis: 0.10
+  kl_ema: 0.90
+
+training:
+  base_model: "Qwen/Qwen2.5-7B-Instruct"
+  sft_dataset: "AI-MO/NuminaMath-1.5"
+  sft_size: 5000
+  rl_prompts: 20000
+  seeds: [0, 1, 2]                # paper reports mean ± std over 3 seeds
+  token_budget_billion: 1.2
+
+blend_weight: 0.5                # λ in the prior blend (Sec. 3.4)

@@ -1,0 +1,4 @@
+# Runtime dependencies for the reference GAC implementation.
+# Framework integration (Trinity-RFT / VERL) is intentionally optional.
+
+torch>=2.1
