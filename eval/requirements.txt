@@ -1,0 +1,10 @@
+# Runtime deps for GAC eval harness
+# Install:  pip install -r eval/requirements.txt
+vllm>=0.6.0
+transformers>=4.44
+datasets>=2.20
+math-verify>=0.5.2
+sympy>=1.13
+tqdm
+numpy
+pandas

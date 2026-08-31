@@ -201,9 +201,19 @@ That's it. GAC only touches the **weighting between** the SFT and RL losses; it 
 
 ## 🛠️ Reproducing Paper Results
 
-> **⚠️ Status (2026-08)**: This repo currently ships the **reference algorithm** — controller, hybrid-loss integration point, unit tests, and default config matching the paper. **Full training scripts, evaluation pipeline, and pretrained checkpoints are landing in v0.2 (targeted for late 2026-09).** See the [Roadmap](#-roadmap) section below.
+> **⚠️ Status (2026-08)**: This repo currently ships the **reference algorithm** + **full evaluation harness** — controller, hybrid-loss integration point, unit tests, default config matching the paper, and 8-benchmark evaluation pipeline. **Training scripts and pretrained checkpoints are landing in v0.2 (targeted for late 2026-09).** See the [Roadmap](#-roadmap) section below.
 
-For now, you can reproduce the *algorithm* end-to-end by wiring GAC into any GRPO/PPO trainer of your choice (VeRL, TRL, OpenRLHF, Trinity-RFT). The `configs/gac_default.yaml` gives you every hyperparameter in the paper's Sec. 4.1.
+### Evaluate any Qwen2.5-family checkpoint on the 8 paper benchmarks
+
+The `eval/` directory ships a self-contained harness that reproduces the numbers in paper Tables 1–4 across **8 benchmarks / 4 domains** — Math (AMC / AIME24 / AIME25), Knowledge (MMLU-Pro / GPQA / SciBench), Code (MBPP / HumanEval), Logic (BBH). Point it at any HuggingFace `AutoModelForCausalLM` directory:
+
+```bash
+cd eval
+pip install -r requirements.txt
+bash run_all.sh --model_path /path/to/your-checkpoint --output_dir ./results --tp_size 4
+```
+
+On 4×A100/A800, wall-clock is ~90 minutes for a 7B model. See [`eval/README.md`](eval/README.md) for full details, individual-benchmark commands, and multi-seed aggregation.
 
 ### Default hyperparameters
 
@@ -232,10 +242,10 @@ All main results report **mean ± std over 3 seeds** with joint significance thr
 
 | Version | Target | Contents |
 |---|---|---|
-| ✅ **v0.1.0** | 2026-08 | Reference `AdaptiveMuController`, hybrid-loss integration, unit tests, default config |
-| 🚧 **v0.2.0** | 2026-09 | Full training pipeline (VeRL fork), 4-domain eval scripts, wandb log links |
+| ✅ **v0.1.0** | 2026-08 | Reference `AdaptiveMuController`, hybrid-loss integration, unit tests, default config, **8-benchmark eval harness** |
+| 🚧 **v0.2.0** | 2026-09 | Training pipeline (VeRL fork), public wandb log links |
 | 🚧 **v0.3.0** | 2026-10 | HuggingFace checkpoints (Qwen2.5-1.5B / 7B), `gac-core` on PyPI |
-| 🚧 **v0.4.0** | 2026-11 | Docker image, 1-command `run.sh` reproduction, results verified externally |
+| 🚧 **v0.4.0** | 2026-11 | Docker image, 1-command `run.sh` reproduction, external verification runs |
 
 ---
 
@@ -279,10 +289,20 @@ GAC/
 │   ├── hybrid_loss.py       # Reference hybrid loss (μ·L_SFT + (1-μ)·L_RL)
 │   ├── utils.py             # Length-invariant masked reductions
 │   └── __init__.py
+├── eval/                    # 8-benchmark evaluation harness
+│   ├── generate_vllm.py     # Unified vLLM generator
+│   ├── math_bench.py        # AMC / AIME24 / AIME25 (math-verify scoring)
+│   ├── knowledge_bench.py   # MMLU-Pro / GPQA / SciBench
+│   ├── code_bench.py        # MBPP / HumanEval (bigcode-eval scoring)
+│   ├── bbh_logic.py         # BBH logical subsets
+│   ├── aggregate.py         # Multi-seed mean±std aggregation
+│   ├── run_all.sh           # One-command reproduction
+│   └── README.md            # Detailed usage & data provenance
 ├── configs/
 │   └── gac_default.yaml     # Default hyperparameters (paper Sec. 4.1)
 ├── docs/
-│   └── method.md            # Long-form derivation and proxy semantics
+│   ├── method.md            # Long-form derivation and proxy semantics
+│   └── index.html           # Project page (served by GitHub Pages)
 ├── tests/
 │   └── test_controller.py   # Closed-form estimator unit tests
 ├── assets/                  # Figures used in this README
