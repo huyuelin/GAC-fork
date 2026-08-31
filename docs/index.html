@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GAC: Noise-Aware Adaptive Mixing for Hybrid SFT-RL Post-Training. EMNLP 2026.">
+<meta name="author" content="Yuelin Hu, Wei Liu, Zhenbo Yu, Zhengxue Cheng, Li Song">
+<meta property="og:title" content="GAC · EMNLP 2026">
+<meta property="og:description" content="A closed-form, noise-aware controller for hybrid SFT-RL post-training.">
+<meta property="og:image" content="static/images/method.png">
+<title>GAC · Noise-Aware Adaptive Mixing for Hybrid SFT-RL Post-Training</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎼%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.4/css/academicons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Castoro:ital@0;1&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #8c1b13; --accent-soft: #b83a30; --ink: #1a1a1a; --gray: #4a4a4a; --gray-soft: #7a7a7a; --line: #e4e4e4; --bg-soft: #fafafa; }
+  body { font-family: 'Google Sans', 'Noto Sans', sans-serif; color: var(--ink); background: #fff; }
+  h1, h2, h3, .title, .subtitle { font-family: 'Google Sans', sans-serif; }
+  .paper-title { font-family: 'Castoro', 'Google Sans', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .hero-body { padding: 3.5rem 1.5rem 3rem; }
+  .publication-title { font-size: 2.6rem; line-height: 1.18; margin-bottom: 1rem; color: var(--ink); }
+  .publication-title .accent { color: var(--accent); font-style: italic; }
+  .publication-authors { font-size: 1.15rem; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.55; }
+  .publication-authors a { color: var(--ink); border-bottom: 1px dotted var(--gray-soft); }
+  .publication-authors a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .author-block { display: inline-block; margin-right: 0.5rem; white-space: nowrap; }
+  .corresponding { color: var(--accent); font-weight: 700; }
+  .affiliations { font-size: 0.95rem; color: var(--gray); margin-bottom: 0.5rem; }
+  .venue { font-size: 1.1rem; color: var(--gray); margin-top: 0.7rem; margin-bottom: 1.5rem; font-style: italic; }
+  .venue .venue-name { color: var(--accent); font-weight: 700; font-style: normal; }
+  .link-block { margin: 0 0.35rem 0.5rem; }
+  .link-block .button { border-radius: 24px; padding: 0 1.15rem; height: 2.35rem; font-size: 0.92rem; font-weight: 500; background: var(--ink); color: #fff; border: none; transition: all 0.15s ease; }
+  .link-block .button:hover { background: var(--accent); transform: translateY(-1px); }
+  .link-block .button.is-disabled { background: var(--gray-soft); cursor: not-allowed; }
+  .link-block .button.is-disabled:hover { background: var(--gray-soft); transform: none; }
+  .link-block .icon { margin-right: 0.4rem; }
+  section.section { padding: 2.5rem 1.5rem; }
+  section.section.alt { background: var(--bg-soft); }
+  .section-title { font-size: 1.9rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--ink); text-align: center; letter-spacing: -0.005em; }
+  .section-title::after { content: ''; display: block; width: 48px; height: 3px; background: var(--accent); margin: 0.75rem auto 0; }
+  .content p { font-size: 1.05rem; line-height: 1.72; color: var(--ink); margin-bottom: 1rem; }
+  .content strong { color: var(--ink); font-weight: 700; }
+  .highlight-red { color: var(--accent); font-weight: 700; }
+  .method-figure { max-width: 92%; margin: 1rem auto; display: block; box-shadow: 0 3px 22px rgba(0,0,0,0.09); border-radius: 4px; }
+  .metric-figure { max-width: 100%; margin: 1rem auto; display: block; box-shadow: 0 2px 14px rgba(0,0,0,0.07); border-radius: 4px; }
+  .caption { text-align: center; font-size: 0.92rem; color: var(--gray); margin-top: 0.6rem; margin-bottom: 1.5rem; font-style: italic; }
+  .tldr-box { border-left: 4px solid var(--accent); padding: 1.1rem 1.4rem; background: #fff8f7; border-radius: 3px; margin: 1.5rem 0; }
+  .tldr-box .tldr-label { display: inline-block; background: var(--accent); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.65rem; border-radius: 3px; letter-spacing: 0.08em; margin-bottom: 0.55rem; }
+  .highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+  .highlight-card { padding: 1.2rem 1.3rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .highlight-card:hover { transform: translateY(-2px); box-shadow: 0 4px 18px rgba(0,0,0,0.06); }
+  .highlight-card .icon { font-size: 1.3rem; color: var(--accent); margin-bottom: 0.4rem; display: block; }
+  .highlight-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.35rem; }
+  .highlight-card p { font-size: 0.95rem; color: var(--gray); line-height: 1.55; margin: 0; }
+  table.results { margin: 1rem auto; border-collapse: collapse; font-size: 0.94rem; width: 100%; max-width: 900px; }
+  table.results th, table.results td { padding: 0.55rem 0.75rem; border: none; text-align: center; }
+  table.results thead th { background: var(--ink); color: #fff; font-weight: 600; }
+  table.results tbody tr:nth-child(even) { background: var(--bg-soft); }
+  table.results tbody tr.ours { background: #fff8f7; font-weight: 700; }
+  table.results tbody tr.ours td { color: var(--accent); }
+  table.results tbody tr.delta { border-top: 2px solid var(--ink); color: var(--accent); font-weight: 500; font-size: 0.88rem; }
+  table.results td:first-child { text-align: left; font-weight: 500; }
+  .equation-box { text-align: center; padding: 1.5rem 1rem; background: var(--bg-soft); border-radius: 6px; margin: 1.5rem 0; font-family: 'Castoro', serif; font-size: 1.35rem; }
+  .roadmap-list { list-style: none; padding-left: 0; margin: 1rem 0; }
+  .roadmap-list li { padding: 0.55rem 0; border-bottom: 1px dashed var(--line); display: flex; align-items: baseline; gap: 0.75rem; }
+  .roadmap-list li:last-child { border-bottom: none; }
+  .roadmap-list .tag { font-size: 0.72rem; padding: 0.1rem 0.5rem; border-radius: 3px; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; }
+  .roadmap-list .tag.done { background: #d4edda; color: #155724; }
+  .roadmap-list .tag.todo { background: #fff3cd; color: #856404; }
+  .roadmap-list .version { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.92rem; min-width: 4.5rem; }
+  pre.bibtex { background: var(--ink); color: #e6e6e6; padding: 1.2rem 1.4rem; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.55; overflow-x: auto; }
+  pre.bibtex .k { color: #80c8ff; }
+  pre.bibtex .v { color: #ffd580; }
+  pre.bibtex .c { color: #999; font-style: italic; }
+  .copy-btn { position: absolute; top: 0.8rem; right: 0.8rem; background: rgba(255,255,255,0.12); color: #fff; border: none; padding: 0.35rem 0.7rem; border-radius: 3px; font-size: 0.78rem; cursor: pointer; transition: background 0.15s ease; }
+  .copy-btn:hover { background: rgba(255,255,255,0.25); }
+  .bibtex-wrapper { position: relative; }
+  .footer-ack { padding: 1.5rem 1rem; font-size: 0.88rem; color: var(--gray); line-height: 1.6; text-align: center; background: var(--bg-soft); }
+  .site-footer { padding: 1.2rem 1rem; text-align: center; font-size: 0.85rem; color: var(--gray-soft); background: var(--ink); color: #999; }
+  .site-footer a { color: #ccc; }
+  @media (max-width: 768px) {
+    .publication-title { font-size: 1.85rem; }
+    .method-figure { max-width: 100%; }
+    .hero-body { padding: 2rem 1rem 1.5rem; }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ================ HERO ================ -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop has-text-centered">
+
+      <h1 class="paper-title publication-title">
+        <span class="accent">GAC</span>: Noise-Aware Adaptive Mixing<br>
+        for Hybrid SFT-RL Post-Training
+      </h1>
+
+      <div class="publication-authors">
+        <span class="author-block"><a href="https://github.com/huyuelin">Yuelin Hu</a><sup>1</sup></span>
+        <span class="author-block">Wei Liu<sup>2</sup></span>
+        <span class="author-block">Zhenbo Yu<sup>1,3</sup><span class="corresponding">*</span></span>
+        <span class="author-block">Zhengxue Cheng<sup>1</sup></span>
+        <span class="author-block">Li Song<sup>1</sup><span class="corresponding">*</span></span>
+      </div>
+
+      <div class="affiliations">
+        <sup>1</sup>Shanghai Jiao Tong University &nbsp;·&nbsp;
+        <sup>2</sup>Shanghai Maritime University &nbsp;·&nbsp;
+        <sup>3</sup>Novacore
+      </div>
+      <div class="affiliations">
+        <span class="corresponding">*</span> Co-corresponding authors
+      </div>
+
+      <div class="venue">
+        Proceedings of the 2026 Conference on
+        <span class="venue-name">Empirical Methods in Natural Language Processing (EMNLP 2026)</span>
+        · Budapest, Hungary
+      </div>
+
+      <!-- Buttons -->
+      <div class="publication-links" style="margin-top: 1.5rem;">
+        <span class="link-block">
+          <a href="#" class="button is-disabled" title="arXiv link coming soon">
+            <span class="icon"><i class="ai ai-arxiv"></i></span>
+            <span>arXiv</span>
+          </a>
+        </span>
+        <span class="link-block">
+          <a href="https://openreview.net/forum?id=VhBpT4iq60" class="button" target="_blank" rel="noopener">
+            <span class="icon"><i class="fas fa-file-alt"></i></span>
+            <span>OpenReview</span>
+          </a>
+        </span>
+        <span class="link-block">
+          <a href="https://github.com/huyuelin/GAC" class="button" target="_blank" rel="noopener">
+            <span class="icon"><i class="fab fa-github"></i></span>
+            <span>Code</span>
+          </a>
+        </span>
+        <span class="link-block">
+          <a href="#" class="button is-disabled" title="HF checkpoints coming soon">
+            <span class="icon">🤗</span>
+            <span>Models</span>
+          </a>
+        </span>
+        <span class="link-block">
+          <a href="#bibtex" class="button">
+            <span class="icon"><i class="fas fa-quote-right"></i></span>
+            <span>BibTeX</span>
+          </a>
+        </span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================ TL;DR ================ -->
+<section class="section" style="padding-top: 1rem;">
+  <div class="container is-max-desktop">
+    <div class="tldr-box">
+      <span class="tldr-label">TL;DR</span>
+      <p style="margin: 0; font-size: 1.05rem;">
+        Hybrid SFT–RL post-training uses a <em>fixed</em> mixing weight μ that ignores how relative signal noise evolves during training. GAC casts μ as an <strong>MSE-optimal gradient estimation problem</strong>, gives a <strong>closed-form solution</strong>, and estimates it online from three cheap coefficient-space proxies. Result: <span class="highlight-red">+3.8 pp over HPT</span> across math / code / science / logic, <span class="highlight-red">28% less KL drift</span>, <span class="highlight-red">&lt; 1% wall-time overhead</span>, and <span class="highlight-red">gains scale with model size</span> (1.5B → 14B).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================ METHOD FIGURE ================ -->
+<section class="section" style="padding-top: 0.5rem;">
+  <div class="container is-max-desktop has-text-centered">
+    <img src="static/images/method.png" alt="GAC method overview" class="method-figure">
+    <p class="caption">
+      GAC treats the SFT/RL mixing weight μ as an estimation target with a closed-form MSE-optimal solution. Three coefficient-space proxies (σ<sub>s</sub>², σ<sub>r</sub>², Δg̃²) feed a guarded update stack (EMA → cosine-prior blend → per-step cap → clipping).
+    </p>
+  </div>
+</section>
+
+<!-- ================ ABSTRACT ================ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Abstract</h2>
+    <div class="content">
+      <p>
+        Hybrid post-training that combines <strong>supervised fine-tuning (SFT)</strong> and <strong>on-policy reinforcement learning (RL)</strong> is the standard recipe for aligning large language models. Yet the <em>mixing weight</em> μ that balances the two signals is almost always a <em>fixed, hand-tuned schedule</em>. This is fragile: when RL noise spikes, or when the SFT expert starts pulling the policy in a direction that disagrees with the reward, a static μ over-commits to whichever side is currently <em>less</em> reliable.
+      </p>
+      <p>
+        We cast SFT–RL mixing as a <strong>minimum-mean-squared-error gradient estimation problem</strong> and derive a closed-form optimal mixing weight:
+      </p>
+      <div class="equation-box">
+        μ<sup>*</sup> = ( α<sub>tgt</sub>·Δg² + σ<sub>r</sub>² ) / ( Δg² + σ<sub>s</sub>² + σ<sub>r</sub>² )
+      </div>
+      <p>
+        that balances SFT noise, RL noise, and SFT–RL disagreement. Because gradient-level quantities are prohibitively expensive at every step, we introduce three <strong>coefficient-space proxies</strong> — estimated online from tensors any GRPO/PPO trainer already computes — and wrap them in a guarded update stack: EMA smoothing, a cosine-schedule prior, per-step change capping, and hard clipping. The controller is <em>length-invariant by construction</em> and has <em>less than 1% wall-time overhead</em>.
+      </p>
+      <p>
+        Across math, code, science, and logic benchmarks, the noise-aware estimator alone outperforms the best rule-based baseline; the full system reaches <span class="highlight-red">+3.8 pp over HPT</span> on average, while reducing <span class="highlight-red">KL-drift area by 28%</span> and large |Δμ| events by <span class="highlight-red">more than 70%</span>. Gains grow monotonically with model scale from Qwen2.5-1.5B to Qwen2.5-14B.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================ KEY HIGHLIGHTS ================ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Key Highlights</h2>
+    <div class="highlights-grid">
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-bullseye"></i></span>
+        <h3>Closed-form μ*</h3>
+        <p>MSE-optimal derivation. No meta-learning, no bilevel optimization, no extra hyperparameter grid.</p>
+      </div>
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-microscope"></i></span>
+        <h3>Coefficient-space proxies</h3>
+        <p>Three cheap signals (σ<sub>s</sub>², σ<sub>r</sub>², Δg̃²) — any PPO / GRPO trainer already computes them.</p>
+      </div>
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-shield-alt"></i></span>
+        <h3>Guarded controller</h3>
+        <p>EMA smoothing → cosine-prior blend → per-step change cap → hard clipping. Robust to mid-training regime shifts.</p>
+      </div>
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-bolt"></i></span>
+        <h3>&lt; 1% wall-time overhead</h3>
+        <p>Proxies computed inside the existing forward pass. No extra network eval, no shadow rollout.</p>
+      </div>
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-chart-line"></i></span>
+        <h3>Scales with model size</h3>
+        <p>+2.2 pp @ 1.5B · +3.8 pp @ 7B · +3.3 pp @ 14B (AMC vs. HPT) — gains grow with model scale.</p>
+      </div>
+      <div class="highlight-card">
+        <span class="icon"><i class="fas fa-ruler-horizontal"></i></span>
+        <h3>Length-invariant</h3>
+        <p>Each sequence contributes exactly one scalar per proxy. Long rollouts don't get extra vote weight.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================ RESULTS ================ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Results</h2>
+    <div class="content">
+      <p style="text-align: center; color: var(--gray);">
+        <strong>Qwen2.5-7B-Instruct · mean ± std over 3 seeds · † = joint p&lt;0.05 &amp; Cohen's d&gt;0.8 vs. best baseline</strong>
+      </p>
+
+      <h3 style="text-align: center; font-size: 1.15rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--gray);">Table 1 · Math &amp; knowledge reasoning</h3>
+      <table class="results">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>AMC</th>
+            <th>AIME24</th>
+            <th>AIME25</th>
+            <th>MMLU-Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Qwen2.5-7B-Instruct</td><td>43.8</td><td>11.7</td><td>6.66</td><td>24.7</td></tr>
+          <tr><td>SFT-best</td><td>55.9 ±0.7</td><td>15.8 ±0.8</td><td>15.2 ±0.6</td><td>38.4 ±0.5</td></tr>
+          <tr><td>DPO</td><td>57.3 ±0.9</td><td>16.4 ±0.7</td><td>15.8 ±0.7</td><td>42.1 ±0.6</td></tr>
+          <tr><td>GRPO (pure RL)</td><td>52.1 ±1.4</td><td>13.2 ±1.1</td><td>8.54 ±1.0</td><td>45.8 ±0.9</td></tr>
+          <tr><td>CHORD</td><td>62.5 ±0.6</td><td>18.2 ±0.5</td><td>17.2 ±0.6</td><td>56.2 ±0.5</td></tr>
+          <tr><td>SRFT</td><td>61.8 ±0.7</td><td>17.9 ±0.6</td><td>17.0 ±0.7</td><td>55.6 ±0.5</td></tr>
+          <tr><td>LUFFY</td><td>63.1 ±0.6</td><td>18.5 ±0.5</td><td>17.6 ±0.6</td><td>56.0 ±0.5</td></tr>
+          <tr><td>HPT</td><td>63.4 ±0.5</td><td>18.7 ±0.5</td><td>17.8 ±0.6</td><td>56.4 ±0.4</td></tr>
+          <tr><td>KL-ctrl</td><td>62.8 ±0.8</td><td>18.4 ±0.6</td><td>17.6 ±0.7</td><td>55.8 ±0.6</td></tr>
+          <tr><td>GAC w/o φ</td><td>65.8 ±0.5</td><td>20.0 ±0.5</td><td>19.1 ±0.6</td><td>57.8 ±0.4</td></tr>
+          <tr class="ours"><td>GAC + Token-φ (Ours)</td><td>67.2 ±0.4†</td><td>20.8 ±0.4†</td><td>19.8 ±0.5†</td><td>58.6 ±0.3†</td></tr>
+          <tr class="delta"><td>Δ vs. best baseline (HPT)</td><td>+3.8</td><td>+2.1</td><td>+2.0</td><td>+2.2</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="text-align: center; font-size: 1.15rem; margin-top: 2.2rem; margin-bottom: 0.5rem; color: var(--gray);">Table 2 · Code generation (pass@1 %)</h3>
+      <table class="results">
+        <thead>
+          <tr><th>Method</th><th>MBPP</th><th>HumanEval</th><th>Avg.</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Qwen2.5-7B-Instruct</td><td>68.4</td><td>72.0</td><td>70.2</td></tr>
+          <tr><td>CHORD</td><td>75.4 ±0.6</td><td>80.5 ±0.5</td><td>78.0</td></tr>
+          <tr><td>LUFFY</td><td>75.8 ±0.6</td><td>80.9 ±0.5</td><td>78.4</td></tr>
+          <tr><td>HPT</td><td>76.0 ±0.5</td><td>81.2 ±0.5</td><td>78.6</td></tr>
+          <tr class="ours"><td>GAC + Token-φ</td><td>78.8 ±0.5†</td><td>83.5 ±0.4†</td><td>81.2</td></tr>
+          <tr class="delta"><td>Δ vs. HPT</td><td>+2.8</td><td>+2.3</td><td>+2.6</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="text-align: center; font-size: 1.15rem; margin-top: 2.2rem; margin-bottom: 0.5rem; color: var(--gray);">Table 3 · Scaling — AMC accuracy across model sizes</h3>
+      <table class="results">
+        <thead>
+          <tr><th>Method</th><th>1.5B</th><th>7B</th><th>14B</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CHORD</td><td>48.2 ±0.9</td><td>62.5 ±0.6</td><td>68.4 ±0.5</td></tr>
+          <tr><td>HPT</td><td>49.6 ±0.8</td><td>63.4 ±0.5</td><td>70.8 ±0.4</td></tr>
+          <tr><td>GAC w/o φ</td><td>51.4 ±0.8</td><td>65.8 ±0.5</td><td>73.2 ±0.4</td></tr>
+          <tr class="ours"><td>GAC + Token-φ</td><td>51.8 ±0.7</td><td>67.2 ±0.4</td><td>74.1 ±0.4</td></tr>
+          <tr class="delta"><td>Δ vs. HPT</td><td>+2.2</td><td>+3.8</td><td>+3.3</td></tr>
+        </tbody>
+      </table>
+      <p class="caption">Gains grow with model size — larger models exhibit greater σ<sub>s</sub>²/σ<sub>r</sub>² dynamic range, giving the noise-aware controller more room to adapt.</p>
+
+      <h3 style="text-align: center; font-size: 1.15rem; margin-top: 2.2rem; margin-bottom: 0.5rem; color: var(--gray);">Table 4 · Science &amp; Logic — top-line vs. best baseline (HPT)</h3>
+      <table class="results">
+        <thead>
+          <tr><th>Domain</th><th>HPT</th><th>GAC + Token-φ</th><th>Δ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>GPQA</td><td>40.4</td><td class="ours" style="color:var(--accent);font-weight:700;">43.5 ±0.5†</td><td class="delta" style="border-top:none;">+3.1</td></tr>
+          <tr><td>SciBench</td><td>38.7</td><td class="ours" style="color:var(--accent);font-weight:700;">41.2 ±0.5†</td><td class="delta" style="border-top:none;">+2.5</td></tr>
+          <tr><td>BBH-Logic (avg)</td><td>62.6</td><td class="ours" style="color:var(--accent);font-weight:700;">65.7 ±0.5†</td><td class="delta" style="border-top:none;">+3.1</td></tr>
+        </tbody>
+      </table>
+
+      <img src="static/images/metrics.png" alt="GAC evaluation metrics" class="metric-figure" style="margin-top: 2.5rem;">
+      <p class="caption">Evaluation performance and rollout dynamics — GAC consistently leads from ~200 steps and maintains a moderate response-length regime (~1.6-2.0k tokens), avoiding the 2.5-3.0k length spikes indicative of reward hacking in baselines.</p>
+
+      <img src="static/images/dynamics.png" alt="GAC μ and proxy dynamics" class="metric-figure">
+      <p class="caption">Controller state — μ trajectory and the three coefficient-space proxies. μ starts near 0.85 (SFT-dominated), gradually decreases to ~0.15 as training matures, and tracks σ<sub>r</sub>² rather than KL — the noise-aware estimator drives μ during &gt;93% of steps.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================ HOW IT WORKS ================ -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">How It Works</h2>
+    <div class="content">
+      <p>Each training step, the controller performs three operations:</p>
+
+      <p><strong>① Proxy estimation.</strong> Three length-invariant scalars are computed from the batch:</p>
+      <ul>
+        <li><strong>σ<sub>r</sub>²</strong> — variance of <em>sequence-level</em> GRPO-normalized advantages. Post-normalization dispersion, <em>not</em> raw reward variance.</li>
+        <li><strong>σ<sub>s</sub>²</strong> — tail-trimmed variance of length-normalized per-sequence NLL on expert samples.</li>
+        <li><strong>Δg̃²</strong> — mean squared coefficient mismatch between SFT and RL token-level gradient coefficients on shared response tokens (after within-batch z-normalization).</li>
+      </ul>
+
+      <p><strong>② Closed-form aggregation</strong> into μ*:</p>
+      <div class="equation-box" style="font-size: 1.2rem;">
+        μ<sup>*</sup> = ( α<sub>tgt</sub> · Δg̃² + σ<sub>r</sub>² ) / ( Δg̃² + σ<sub>s</sub>² + σ<sub>r</sub>² )
+      </div>
+
+      <p><strong>③ Guarded update</strong>:</p>
+      <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--gray);">
+        raw μ* → EMA(β) → blend(λ) with cosine prior → clip |Δμ| ≤ c̄ → clip to [μ<sub>min</sub>, μ<sub>max</sub>]
+      </p>
+
+      <p>Detailed derivation (MSE minimization, proxy-vs-oracle validation, length-invariance proofs) is in Appendices A–D of the paper.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================ CODE / ROADMAP ================ -->
+<section class="section alt">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Code &amp; Roadmap</h2>
+    <div class="content">
+      <p style="text-align: center;">
+        <a href="https://github.com/huyuelin/GAC" class="button is-dark" style="border-radius: 24px;" target="_blank" rel="noopener">
+          <span class="icon"><i class="fab fa-github"></i></span>
+          <span>github.com/huyuelin/GAC</span>
+        </a>
+      </p>
+
+      <ul class="roadmap-list">
+        <li>
+          <span class="tag done">RELEASED</span>
+          <span class="version">v0.1.0</span>
+          <span><em>2026-08</em> · Reference <code>AdaptiveMuController</code>, hybrid-loss integration, unit tests, default config matching paper Sec. 4.1.</span>
+        </li>
+        <li>
+          <span class="tag todo">COMING</span>
+          <span class="version">v0.2.0</span>
+          <span><em>2026-09</em> · Full training pipeline on top of VeRL, 4-domain eval scripts, public wandb log links.</span>
+        </li>
+        <li>
+          <span class="tag todo">COMING</span>
+          <span class="version">v0.3.0</span>
+          <span><em>2026-10</em> · HuggingFace checkpoints (Qwen2.5-1.5B / 7B), <code>gac-core</code> on PyPI.</span>
+        </li>
+        <li>
+          <span class="tag todo">COMING</span>
+          <span class="version">v0.4.0</span>
+          <span><em>2026-11</em> · Docker image, 1-command reproduction, external verification runs.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================ BIBTEX ================ -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">BibTeX</h2>
+    <div class="bibtex-wrapper">
+      <button class="copy-btn" onclick="copyBib()"><i class="far fa-copy"></i> Copy</button>
+      <pre class="bibtex" id="bibtex-block"><span class="c">@inproceedings</span>{<span class="k">hu2026gac</span>,
+  <span class="k">title</span>     = {<span class="v">GAC: Noise-Aware Adaptive Mixing for Hybrid SFT-RL Post-Training</span>},
+  <span class="k">author</span>    = {<span class="v">Hu, Yuelin and Liu, Wei and Yu, Zhenbo and Cheng, Zhengxue and Song, Li</span>},
+  <span class="k">booktitle</span> = {<span class="v">Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP)</span>},
+  <span class="k">year</span>      = {<span class="v">2026</span>},
+  <span class="k">address</span>   = {<span class="v">Budapest, Hungary</span>},
+  <span class="k">url</span>       = {<span class="v">https://openreview.net/forum?id=VhBpT4iq60</span>},
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================ ACKNOWLEDGEMENTS ================ -->
+<div class="footer-ack">
+  <p style="max-width: 780px; margin: 0 auto;">
+    We thank <strong>Novacore</strong> for their collaboration on this work. This work is a <em>joint academic collaboration with Novacore</em>; no commercial rights are asserted.
+    Supported in part by the NSFC (62431015, 62571317, 62501387), the Fundamental Research Funds for the Central Universities, Shanghai Key Laboratory of Digital Media Processing and Transmission under Grant 22DZ2229005, 111 project BP0719010, and the <strong>Ant Group Research Fund</strong> (academic grant; no IP claim).
+  </p>
+</div>
+
+<!-- ================ FOOTER ================ -->
+<footer class="site-footer">
+  <p>
+    Website template adapted from
+    <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>
+    &nbsp;·&nbsp;
+    Released under
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>
+    &nbsp;·&nbsp;
+    Code under
+    <a href="https://github.com/huyuelin/GAC/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a>
+  </p>
+</footer>
+
+<script>
+function copyBib() {
+  const el = document.getElementById('bibtex-block');
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const old = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+    setTimeout(() => { btn.innerHTML = old; }, 1500);
+  });
+}
+</script>
+
+</body>
+</html>

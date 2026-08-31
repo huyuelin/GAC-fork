@@ -14,7 +14,7 @@ setup(
     ),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Yuelin Hu, Zhenbo Yu, Wei Liu, Zhengxue Cheng, Li Song",
+    author="Yuelin Hu, Wei Liu, Zhenbo Yu, Zhengxue Cheng, Li Song",
     url="https://github.com/huyuelin/GAC",
     license="Apache-2.0",
     python_requires=">=3.9",

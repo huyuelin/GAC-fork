@@ -8,12 +8,12 @@ authors:
   - family-names: Hu
     given-names: Yuelin
     affiliation: Shanghai Jiao Tong University
-  - family-names: Yu
-    given-names: Zhenbo
-    affiliation: Shanghai Jiao Tong University
   - family-names: Liu
     given-names: Wei
     affiliation: Shanghai Maritime University
+  - family-names: Yu
+    given-names: Zhenbo
+    affiliation: "Shanghai Jiao Tong University; Novacore"
   - family-names: Cheng
     given-names: Zhengxue
     affiliation: Shanghai Jiao Tong University
@@ -26,10 +26,10 @@ preferred-citation:
   authors:
     - family-names: Hu
       given-names: Yuelin
-    - family-names: Yu
-      given-names: Zhenbo
     - family-names: Liu
       given-names: Wei
+    - family-names: Yu
+      given-names: Zhenbo
     - family-names: Cheng
       given-names: Zhengxue
     - family-names: Song
@@ -40,3 +40,4 @@ preferred-citation:
   year: 2026
   location:
     name: Budapest, Hungary
+  url: "https://openreview.net/forum?id=VhBpT4iq60"
